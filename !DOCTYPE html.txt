@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reproductor de Vocabulario LSA</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f4c81 0%, #1e88e5 50%, #00acc1 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    .contenedor {
+      background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)),
+                  url('alfabeto manual lsa.jpeg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+      max-width: 680px;
+      width: 100%;
+    }
+    h2 {
+      color: #0f4c81;
+      margin-top: 0;
+      margin-bottom: 6px;
+      font-size: 26px;
+      text-align: center;
+    }
+    .subtitulo {
+      text-align: center;
+      color: #37474f;
+      font-weight: 500;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 15px;
+    }
+    .buscador {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 2px solid #bbdefb;
+      border-radius: 12px;
+      outline: none;
+      background-color: rgba(255, 255, 255, 0.95);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    input[type="text"]:focus {
+      border-color: #1e88e5;
+      box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.2);
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #1e88e5, #00acc1);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(30, 136, 229, 0.4);
+    }
+    video {
+      width: 100%;
+      height: 360px;
+      background-color: #0d1b2a;
+      border-radius: 14px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+    .estado {
+      margin-top: 10px;
+      font-size: 15px;
+      color: #0277bd;
+      font-weight: bold;
+      text-align: center;
+      min-height: 20px;
+    }
+    .seccion-chips {
+      margin-top: 18px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(187, 222, 251, 0.8);
+    }
+    .seccion-chips small {
+      color: #37474f;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-height: 180px;
+      overflow-y: auto;
+      padding: 4px 2px;
+    }
+    .chip {
+      background-color: rgba(227, 242, 253, 0.95);
+      color: #0d47a1;
+      border: 1px solid #bbdefb;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chip:hover {
+      background: linear-gradient(135deg, #1e88e5, #00acc1);
+      color: #ffffff;
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(30, 136, 229, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+<div class="contenedor">
+  <h2>Reproductor de Vocabulario LSA</h2>
+  <p class="subtitulo">Escribe una palabra o elige una etiqueta para ver la seña</p>
+
+  <div class="buscador">
+    <input type="text" id="texto" placeholder="Ej: cebra, beneficio, triunfo..." />
+    <button onclick="buscarSena()">Reproducir</button>
+  </div>
+
+  <video id="reproductor" controls autoplay muted playsinline></video>
+  <div class="estado" id="estado"></div>
+
+  <div class="seccion-chips">
+    <small>Vocabulario disponible (haz clic para reproducir):</small>
+    <div class="chips" id="listaVocabulario"></div>
+  </div>
+</div>
+
+<script>
+  const diccionarioLSA = {
+    "beneficio": "Beneficio.mp4",
+    "cebra": "Animales/Cebra.mp4",
+    "lechuza": "Animales/Lechuza o Buho.mp4",
+    "buho": "Animales/Lechuza o Buho.mp4",
+    "vibora": "Animales/Vibora y Serpiente.mp4",
+    "serpiente": "Animales/Vibora y Serpiente.mp4",
+    "adquirir": "Contextos/Adquirir.mp4",
+    "sindrome": "Salud/Sindrome.mp4",
+    "cambiar": "Verbos/Verbos Cambiar.mp4",
+    "atacar": "Vocabularios/Atacar.mp4",
+    "cereales": "Vocabularios/Cereales.mp4",
+    "conquistar": "Vocabularios/Conquistar.mp4",
+    "creencia": "Vocabularios/Creencia.mp4",
+    "dinosaurio": "Vocabularios/Dinosaurio.mp4",
+    "dragon": "Vocabularios/Dragon.mp4",
+    "durazno": "Vocabularios/Durazno.mp4",
+    "encuesta": "Vocabularios/Encuesta.mp4",
+    "frutilla": "Vocabularios/Frutilla.mp4",
+    "idioma portugues": "Vocabularios/Idioma portugues.mp4",
+    "itaembe mini": "Vocabularios/Itaembe Mini.mp4",
+    "mascota": "Vocabularios/Mascota.mp4",
+    "molino": "Vocabularios/Molino.mp4",
+    "moraleja": "Vocabularios/Moraleja.mp4",
+    "oferta": "Vocabularios/Oferta.mp4",
+    "ofrecer": "Vocabularios/Ofrecer.mp4",
+    "origen": "Vocabularios/Origen.mp4",
+    "original": "Vocabularios/Original.mp4",
+    "oruga": "Vocabularios/Oruga.mp4",
+    "paleontologo": "Vocabularios/Panleontologo.mp4",
+    "portugal": "Vocabularios/Portugal.mp4",
+    "presentimiento": "Vocabularios/Presentimiento.mp4",
+    "subsidio": "Vocabularios/Subcidio.mp4",
+    "talento": "Vocabularios/Talento.mp4",
+    "tero": "Vocabularios/Tero.mp4",
+    "tolerancia": "Vocabularios/Tolerancia.mp4",
+    "triunfo": "Vocabularios/Triunfo.mp4",
+    "urquiza": "Vocabularios/Urquiza.mp4",
+    "vencio": "Vocabularios/Vencio.mp4",
+    "wasli": "Vocabularios/WASLI.mp4"
+  };
+
+  const reproductor = document.getElementById("reproductor");
+  const estado = document.getElementById("estado");
+  const inputTexto = document.getElementById("texto");
+  const listaVocabulario = document.getElementById("listaVocabulario");
+
+  reproductor.loop = true;
+
+  for (let palabra in diccionarioLSA) {
+    let boton = document.createElement("span");
+    boton.className = "chip";
+    boton.textContent = palabra;
+    boton.onclick = () => {
+      inputTexto.value = palabra;
+      buscarSena();
+    };
+    listaVocabulario.appendChild(boton);
+  }
+
+  function normalizar(texto) {
+    return texto.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function buscarSena() {
+    const consulta = normalizar(inputTexto.value);
+
+    if (diccionarioLSA[consulta]) {
+      reproductor.src = encodeURI(diccionarioLSA[consulta]);
+      reproductor.play().catch(() => {});
+      estado.style.color = "#0277bd";
+      estado.textContent = "Mostrando seña: " + consulta;
+    } else {
+      reproductor.removeAttribute("src");
+      reproductor.load();
+      estado.style.color = "#c62828";
+      estado.textContent = "No se encontró esa palabra en el diccionario.";
+    }
+  }
+
+  reproductor.onerror = () => {
+    if (reproductor.getAttribute("src")) {
+      estado.style.color = "#c62828";
+      estado.textContent = "Error: No se pudo cargar el archivo de video.";
+    }
+  };
+
+  inputTexto.addEventListener("input", () => {
+    const filtro = normalizar(inputTexto.value);
+    const chips = listaVocabulario.querySelectorAll(".chip");
+    chips.forEach(chip => {
+      const coincide = normalizar(chip.textContent).includes(filtro);
+      chip.style.display = coincide ? "inline-block" : "none";
+    });
+  });
+
+  inputTexto.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") buscarSena();
+  });
+</script>
+
+</body>
+</html>
